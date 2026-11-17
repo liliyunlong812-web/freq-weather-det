@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+*.pth
+*.log
+.venv/
+output/
+runs/
+data/
