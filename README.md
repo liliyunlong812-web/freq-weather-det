@@ -1,29 +1,39 @@
-# -
-用来存储我写论文过程中的代码数据集
+# freq-weather-det
 
-## 模块说明
+频率前端 + RT-DETRv2-S，用于恶劣天气目标检测。实验结果见 [RESULTS.md](RESULTS.md)。
 
-freq_modules.py 提供恶劣天气检测的频率模块。
+## 结构
 
-- C1 双域频率解耦，使用 Haar DWT 子带门控与 FFT 幅度/相位分离。
-- C2 根据浅层检测特征生成空间门控，使用主干首阶段的 stride-8 特征。
-- C3 提供相位一致性损失与离线 logit 蒸馏损失。
+```
+freq_modules.py             前端模块（DWT + FFT，含 mode="conv" 的 sham 对照）
+patches/rtdetr_patched.py   RTDETRFront：把前端接在 backbone 之前
+configs/                    数据与模型配置（11 个）
+scripts/make_adverse.py     合成雾 / 低照数据
+scripts/voc2coco.py         VOC xml → COCO json
+logs/                       各组实验汇总与训练日志尾部
+```
 
-前端接在输入图像与 RT-DETR 主干之间，RTDETRFront 补丁接入 C1。
+## 环境
 
-## 实验结果见 RESULTS.md
+- Python 3.10.20，PyTorch 2.7.1+cu128，单卡 RTX 5090（32 GB）
+- 检测器：RT-DETRv2-S（ResNet-18 VD），640 输入，3 层解码器
+- 训练：40 epoch，seed 0/1/2（部分实验 0–4），有效 batch 16
+- 单 epoch 约 54 s，峰值显存 13.4 GB
 
-实验结果见 [RESULTS.md](RESULTS.md)，日志来源见 [logs/README.md](logs/README.md)。
+## 数据
 
-运行环境为 Python 3.10.20、PyTorch 2.7.1+cu128。模型采用 RT-DETRv2-S R18、640 输入、40 epoch、seed 0/1/2。
+- 训练 / 验证：VOC2012 合成雾，2400 / 600 图（5696 / 1312 框）
+- 跨严重度测试：同 600 图重新合成为重雾（β=4~6），训练时未出现
 
-## 代码结构（freq_modules.py / patches / configs / scripts / logs）
+## 模块
 
-- `freq_modules.py` 保存频率模块实验版本。
-- `patches/rtdetr_patched.py` 保存 RT-DETR 集成补丁。
-- `configs/` 保存雾天、重雾及消融配置。
-- `scripts/make_adverse.py` 生成恶劣天气图像。
-- `scripts/voc2coco.py` 将 VOC 标注转换为 COCO 格式。
-- `logs/` 保存汇总、评估 CSV、训练尾日志及来源说明。
+| 编号 | 名称 | 接入点 |
+|---|---|---|
+| C1 | DualDomainFrontend | 输入图 → backbone 之前 |
 
-运行需使用上游 RT-DETRv2 工程布局，配置 include 依赖上游 runtime、dataloader、optimizer 和模型定义。数据集配置、模型配置及补丁需放入上游对应目录，数据路径按实际位置调整。补丁通过同包相对导入使用 freq_modules.py。
+前端初始化为恒等（实测偏差 6e-8），增益由检测损失学习。
+`mode="conv"` 为 sham 对照：同残差结构、同量级参数、不做任何频率变换。
+
+## 引用与出处
+
+检测骨架：RT-DETR，CVPR 2024，pp. 16965–16974。

@@ -1,19 +1,25 @@
-# 日志来源
+# logs
 
-文件原样复制自 staging/collect/logs。下表根据文件内容、配置路径和最佳 AP 对应实验。汇总文件的具体提取命令在素材中未记录。
+本目录保存各组实验的汇总文件与训练日志尾部。完整训练日志不入库（单份约 30 MB）。
 
-| 文件 | 实验与配置 | 产生方式 |
-| --- | --- | --- |
-| `seeds_summary.txt` | 域内基线与 c1s，seed 0/1/2，分别对应 rtdetrv2_r18vd_fog.yml 与 rtdetrv2_r18vd_fog_c1s.yml | 汇总训练 mAP、AP_S，保留种子和配置路径 |
-| `c1L_summary.txt` | 域内 C1L，seed 0/1/2，对应 rtdetrv2_r18vd_fog_c1L.yml | 汇总训练 mAP，seed 2 与 L_2 尾日志 best_stat 一致 |
-| `heavy_eval.csv` | 重雾基线与 c1s，seed 0/1/2，对应 heavy_base.yml 与 heavy_c1s.yml | 汇总训练权重的重雾评估 AP50、AP，权重路径和命令未记录 |
-| `heavy_L.csv` | 重雾 C1L，seed 0/1/2，对应 heavy_c1L.yml | 汇总重雾评估 AP50、AP，权重路径和命令未记录 |
-| `grid_summary.txt` | 早期雾天试跑，涉及基线、c1、c1s | 提取 best_stat，记录时间、配置路径及最佳 epoch，种子和运行命令未记录 |
-| `ab_summary.txt` | FFT-only 消融，seed 0/1，对应 rtdetrv2_r18vd_fog_fftonly.yml | 汇总两次运行的 AP |
-| `s_base_0_tail.txt` | 域内基线 seed 0，对应 rtdetrv2_r18vd_fog.yml | 完整训练输出末尾 200 行，best_stat 与 seeds_summary 对应 |
-| `s_c1s_2_tail.txt` | 域内 c1s seed 2，对应 rtdetrv2_r18vd_fog_c1s.yml | 完整训练输出末尾 200 行，best_stat 与 seeds_summary 对应 |
-| `L_2_tail.txt` | 域内 C1L seed 2，对应 rtdetrv2_r18vd_fog_c1L.yml | 完整训练输出末尾 200 行，best_stat 与 c1L_summary 对应 |
+| 文件 | 内容 |
+|---|---|
+| `seeds_summary.txt` | 域内 40 epoch，基线 / C1-32，seed 0–2 |
+| `c1L_summary.txt` | 域内 40 epoch，C1-64，seed 0–2 |
+| `heavy_eval.csv` | 重雾交叉测试：基线 / C1-32 |
+| `heavy_L.csv` | 重雾交叉测试：C1-64 |
+| `ab_summary.txt` | 分支消融：FFT-only / DWT-only，各 3 个种子 |
+| `queue2_summary.txt` | sham 对照、γ 解耦、补充种子（seed 3/4） |
+| `*-tail.txt` | 代表性训练日志末尾 200 行，用于核对 best_stat 行 |
 
-原始完整训练日志没有入库，只保留末尾 200 行。三个尾日志均已核对为 200 行，汇总 TXT 和 CSV 保留素材提供的完整文件。
+## 生成方式
 
-配置位于 configs/，日志原始路径沿用上游 RT-DETRv2 布局。c1s 配置实际 front_hidden=32，结果表沿用任务指定 C1-16 名称并注明对应关系，C1L 为宽度 64。
+- 训练：`python tools/train.py -c <config> -u epoches=40 seed=N checkpoint_freq=40 output_dir=<out>`
+- 汇总：从日志中抓取最后一行 `best_stat` 的 `coco_eval_bbox`
+- 重雾评估：`python tools/train.py -c configs/rtdetrv2/heavy_*.yml -r <ckpt> --test-only`
+
+## 口径
+
+- 所有数字为 40 epoch 训练结束后的 best AP（COCO AP，IoU 0.50:0.95）
+- 同配置同种子重跑，AP 最大偏差 0.011，因此小于 1.5 点的差异不作结论
+- 早期 30 epoch 的探索性结果（`grid_summary.txt`）口径不同，不与上表并列

@@ -6,7 +6,7 @@ __include__: [
   './include/rtdetrv2_r50vd.yml',
 ]
 
-output_dir: /home/ubuntu/ws/runs/c1s_fog
+output_dir: /home/ubuntu/ws/runs/c1L_fog
 
 model: RTDETRFront
 
