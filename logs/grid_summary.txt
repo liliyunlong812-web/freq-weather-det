@@ -1,0 +1,5 @@
+08:49 configs/rtdetrv2/rtdetrv2_r18vd_fog.yml -> best_stat: {'epoch': 27, 'coco_eval_bbox': 0.22724720335904586}
+09:07 configs/rtdetrv2/rtdetrv2_r18vd_fog_c1.yml -> best_stat: {'epoch': 28, 'coco_eval_bbox': 0.24091011174837554}
+09:25 configs/rtdetrv2/rtdetrv2_r18vd_fog_c1s.yml -> best_stat: {'epoch': 29, 'coco_eval_bbox': 0.2456597073867605}
+09:54 configs/rtdetrv2/rtdetrv2_r18vd_fog.yml -> best_stat: {'epoch': 39, 'coco_eval_bbox': 0.295219322633838}
+10:19 configs/rtdetrv2/rtdetrv2_r18vd_fog_c1s.yml -> best_stat: {'epoch': 37, 'coco_eval_bbox': 0.29144104734412685}

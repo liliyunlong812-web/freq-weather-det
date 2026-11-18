@@ -1,0 +1,2 @@
+fftonly seed=0 AP=0.3074269712400779
+fftonly seed=1 AP=0.298459038219122

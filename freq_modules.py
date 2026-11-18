@@ -16,6 +16,12 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+try:
+    from ...core import register
+except Exception:  # standalone use
+    def register(*a, **k):
+        return lambda c: c
+
 __all__ = [
     "HaarDWT",
     "HaarIDWT",
@@ -39,8 +45,8 @@ class HaarDWT(nn.Module):
                 [[1.0, -1.0], [1.0, -1.0]],
                 [[1.0, -1.0], [-1.0, 1.0]],
             ]
-        ) / 4.0
-        weight = k.repeat(channels, 1, 1, 1)  # (4C, 1, 2, 2)
+        ) / 2.0
+        weight = k.unsqueeze(1).repeat(channels, 1, 1, 1)  # (4C, 1, 2, 2)
         self.register_buffer("weight", weight)
         self.channels = channels
 
@@ -65,8 +71,8 @@ class HaarIDWT(nn.Module):
                 [[1.0, -1.0], [1.0, -1.0]],
                 [[1.0, -1.0], [-1.0, 1.0]],
             ]
-        ) / 4.0
-        weight = k.repeat(channels, 1, 1, 1)
+        ) / 2.0
+        weight = k.unsqueeze(1).repeat(channels, 1, 1, 1)
         self.register_buffer("weight", weight)
         self.channels = channels
 
@@ -96,10 +102,12 @@ class SubBandGate(nn.Module):
         return x * (2.0 * self.body(x) - 1.0)
 
 
+@register()
 class DualDomainFrontend(nn.Module):
     """C1: wavelet sub-band correction plus FFT magnitude gating with phase preservation."""
 
-    def __init__(self, channels: int = 3, hidden: int = 16, alpha: float = 0.5, beta: float = 0.1, gamma: float = 0.1):
+    def __init__(self, channels: int = 3, hidden: int = 16, alpha: float = 0.5, beta: float = 0.1, gamma: float = 0.1,
+                 use_wav: bool = True, use_fft: bool = True):
         super().__init__()
         self.dwt = HaarDWT(channels)
         self.idwt = HaarIDWT(channels)
@@ -123,23 +131,27 @@ class DualDomainFrontend(nn.Module):
         nn.init.zeros_(self.pha[-2].weight)
         nn.init.zeros_(self.pha[-2].bias)
         self.alpha, self.beta, self.gamma = alpha, beta, gamma
+        self.use_wav, self.use_fft = use_wav, use_fft
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         # ---- wavelet branch: correct directional high-frequency sub-bands, keep LL ----
         ll, lh, hl, hh = self.dwt(x)
-        wav = self.idwt(ll, self.gate_lh(lh), self.gate_hl(hl), self.gate_hh(hh))
+        wav = self.idwt(ll, lh + self.gate_lh(lh), hl + self.gate_hl(hl), hh + self.gate_hh(hh))
         wav = wav[..., : x.shape[-2], : x.shape[-1]]
 
         # ---- Fourier branch: gate magnitude, keep phase with a small residual ----
+        if not self.use_fft:
+            return x + self.gamma * (0.5 * (wav - x))
         spec = torch.fft.rfft2(x, norm="ortho")
         mag, pha = spec.abs(), spec.angle()
         mag = mag * (1.0 + self.alpha * self.amp(mag))
         pha = pha + self.beta * self.pha(pha)
         rec = torch.fft.irfft2(torch.polar(mag, pha), s=x.shape[-2:], norm="ortho")
 
-        return x + self.gamma * (0.5 * (wav + rec))
+        return x + self.gamma * (0.5 * ((wav - x) + (rec - x)))
 
 
+@register()
 class DetectionEvidenceGate(nn.Module):
     """C2: spatial gate derived from a shallow detector feature map."""
 

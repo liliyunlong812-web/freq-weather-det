@@ -1,0 +1,6 @@
+seed=0 cfg=configs/rtdetrv2/rtdetrv2_r18vd_fog.yml mAP=0.28429726916889425 AP_S=0.236
+seed=0 cfg=configs/rtdetrv2/rtdetrv2_r18vd_fog_c1s.yml mAP=0.28318235247398105 AP_S=0.265
+seed=1 cfg=configs/rtdetrv2/rtdetrv2_r18vd_fog.yml mAP=0.27551594450226813 AP_S=0.280
+seed=1 cfg=configs/rtdetrv2/rtdetrv2_r18vd_fog_c1s.yml mAP=0.29774035684878714 AP_S=0.305
+seed=2 cfg=configs/rtdetrv2/rtdetrv2_r18vd_fog.yml mAP=0.29421335764435796 AP_S=0.264
+seed=2 cfg=configs/rtdetrv2/rtdetrv2_r18vd_fog_c1s.yml mAP=0.31032324938861156 AP_S=0.246
