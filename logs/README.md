@@ -9,8 +9,10 @@
 | `heavy_eval.csv` | 重雾交叉测试：基线 / C1-32 |
 | `heavy_L.csv` | 重雾交叉测试：C1-64 |
 | `ab_summary.txt` | 分支消融：FFT-only / DWT-only，各 3 个种子 |
-| `queue2_summary.txt` | sham 对照、γ 解耦、补充种子（seed 3/4） |
+| `queue2_summary.txt` | sham 对照、γ 解耦、补充种子 |
 | `*-tail.txt` | 代表性训练日志末尾 200 行，用于核对 best_stat 行 |
+| `g15_summary.txt` | γ=1.5 扫描，3 个种子 |
+| `heavy_all.csv` | 重雾评估全表，含每个权重的绝对路径（base/sham/c1L/g15/fftonly/dwtonly） |
 
 ## 生成方式
 
