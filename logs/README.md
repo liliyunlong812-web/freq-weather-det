@@ -13,6 +13,7 @@
 | `*-tail.txt` | 代表性训练日志末尾 200 行，用于核对 best_stat 行 |
 | `g15_summary.txt` | γ=1.5 扫描，3 个种子 |
 | `heavy_all.csv` | 重雾评估全表，含每个权重的绝对路径（base/sham/c1L/g15/fftonly/dwtonly） |
+| `probe.csv` | 频率成分探针：原始 / 低通 / 高通三种输入条件下 base 与 C1-64 的评估结果 |
 
 ## 生成方式
 
