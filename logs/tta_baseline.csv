@@ -1,0 +1,11 @@
+cond,seed,AP
+clahe,0,0.271
+clahe,1,0.261
+clahe,2,0.272
+clahe,3,0.272
+clahe,4,0.270
+gamma,0,0.281
+gamma,1,0.267
+gamma,2,0.293
+gamma,3,0.286
+gamma,4,0.269
