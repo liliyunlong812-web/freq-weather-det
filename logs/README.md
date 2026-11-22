@@ -15,6 +15,7 @@
 | `heavy_all.csv` | 重雾评估全表，含每个权重的绝对路径（base/sham/c1L/g15/fftonly/dwtonly） |
 | `probe.csv` | 频率成分探针：原始 / 低通 / 高通三种输入条件下 base 与 C1-64 的评估结果 |
 | `subband.csv` | 子带干预：逐一移除 LH/HL/HH 后的评估结果 |
+| `genB.csv` | 跨生成器测试：genB 雾模型下的基线 / 频率前端评估 |
 
 ## 生成方式
 
